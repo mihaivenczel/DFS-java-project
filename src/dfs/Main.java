@@ -8,9 +8,59 @@ import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import java.rmi.server.UnicastRemoteObject;
 import java.util.List;
-
+import java.io.Console;
+import java.io.File;
+import java.io.FileFilter;
+import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Main {
+    
+  static   String ANSI_BLUE = "\u001B[34m";
+      static      String ANSI_RESET = "\u001B[0m";
+     static       BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+         //dir();
+     static  String file_delete;
+ static String str1;
+        static      String name;
+        static      String filename;
+        static      int nr;
+            // Client c = new Client();
+        static      byte[] rez;
+        static      byte[] ret;
+        static      byte[] gol = null;
+        static      boolean ok = true;
+        static     String text;
+       static String file;
+        static           SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+              static String file_name ;
+        static           String newline = System.lineSeparator();
+         static          char[] ss;
+        static           byte[] data;
+     static Date date;
+    public static void dir(){
+        File dir = new File("C:\\");
+      File[] files = dir.listFiles();
+      FileFilter fileFilter = new FileFilter() {
+         public boolean accept(File file) {
+            return file.isDirectory();
+         }
+      };
+      files = dir.listFiles(fileFilter);
+      System.out.println(files.length);
+      
+      if (files.length == 0) {
+         System.out.println("Either dir does not exist or is not a directory");
+      } else {
+         for (int i = 0; i< files.length; i++) {
+            File filename = files[i];
+            System.out.println(filename.toString());
+         }
+      }
+    }
 
 	static int regPort = Configurations.REG_PORT;
 
@@ -44,43 +94,167 @@ public class Main {
 		br.close();
 	}
 
-	public static void launchClients(){
-		try {
-			Client c = new Client();
-			char[] ss = "File 1 test test END ".toCharArray();
-			byte[] data = new byte[ss.length];
-			for (int i = 0; i < ss.length; i++) 
-				data[i] = (byte) ss[i];
+    public static void afisare_comenzi() {
+        System.out.println(ANSI_BLUE + "Possible actions are:" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "ls" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "write" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "read" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "rm" + ANSI_RESET);
+        System.out.println(ANSI_BLUE + "Type 'Exit' to exit" + ANSI_RESET);
+        System.out.println();
+    }
 
-			c.write("file1", data);
-			byte[] ret = c.read("file1");
-			System.out.println("file1: " + ret);
+    public static int input_command() throws IOException {
+        System.out.println(ANSI_BLUE + "Choose an action : 'ls', 'write', 'read' si 'rm' " + ANSI_RESET);
+        name = reader.readLine();
+        
+         if(name.equalsIgnoreCase("Exit"))
+         return 0;
+        if (name.equalsIgnoreCase("ls")) 
+            return 1;
+        if (name.equalsIgnoreCase("write")) 
+            return 2;
+        if (name.equalsIgnoreCase("read")) 
+            return 3;
+        if (name.equalsIgnoreCase("rm")) 
+            return 4;
+         return 5;
+    }
 
-			c = new Client();
-			ss = "File 1 Again Again END ".toCharArray();
-			data = new byte[ss.length];
-			for (int i = 0; i < ss.length; i++) 
-				data[i] = (byte) ss[i];
+    public static void show_files() {
+        Client c3 = new Client(); 
+        File directoryPath = new File("C:\\Users\\Mihai\\Documents\\NetBeansProjects\\DFS\\Replica_0"); 
+        File directoryPathAux;
+        String contents[] = directoryPath.list(); 
+ 
+        System.out.println(ANSI_BLUE + "Number of files : " + contents.length + ANSI_RESET); 
+        System.out.println(ANSI_BLUE + "Files and folder: " + ANSI_RESET);
+        for (int i = 0; i < contents.length; i++) {
+            directoryPathAux=new File("C:\\Users\\Mihai\\Documents\\NetBeansProjects\\DFS\\Replica_0"+contents[i]);
+            if(directoryPathAux.isFile()==true)
+            System.out.println(contents[i]+" "
+                    + "(file)");
+            else 
+                 System.out.println(contents[i]+" (folder)");
+            
+        }
+      
+    }
 
-			c.write("file1", data);
-			ret = c.read("file1");
-			System.out.println("file1: " + ret);
+    public static void show_file_content() throws IOException, NotBoundException, MessageNotFoundException {
+        Client c = new Client();
 
-			c = new Client();
-			ss = "File 2 test test END ".toCharArray();
-			data = new byte[ss.length];
-			for (int i = 0; i < ss.length; i++) 
-				data[i] = (byte) ss[i];
+        System.out.println(ANSI_BLUE + "TYPE selected: enter the name of the file you want to read" + ANSI_RESET);
+        System.out.println();
+        file = reader.readLine(); 
+        ss = " ".toCharArray(); 
+        data = new byte[ss.length]; 
+        for (int i = 0; i < ss.length; i++) { 
+            data[i] = (byte) ss[i];
+        }
+        c.write(file, data); 
 
-			c.write("file2", data);
-			ret = c.read("file2");
-			System.out.println("file2: " + ret);
+        String str = new String(c.read(file)); 
+        date = new Date(System.currentTimeMillis()); 
+        text = newline + "Client " + c + " read file: '" + file + "'" + " at: " + formatter.format(date); 
+        ss = text.toCharArray(); 
+        data = new byte[ss.length]; 
+        for (int i = 0; i < ss.length; i++) {
+            data[i] = (byte) ss[i];
+        }
+        c.write("logs_type", data); 
+        System.out.println(ANSI_BLUE + "Text in file: :" + ANSI_RESET);
+        System.out.println(str); 
 
-		} catch (NotBoundException | IOException | MessageNotFoundException e) {
-			e.printStackTrace();
-		}
-	}
+    }
 
+    public static void delete_file() throws IOException, NotBoundException, MessageNotFoundException {
+        Client c2 = new Client();
+        System.out.println(ANSI_BLUE + "DELETE selected: enter the name of the file you want to delete" + ANSI_RESET);
+        System.out.println();
+        file_delete = reader.readLine(); 
+        file_name = file_delete;
+        for (int x = 0; x < 3; x++) { 
+            String fileName = "C:\\Users\\Mihai\\Documents\\NetBeansProjects\\DFS\\Replica_" + x + "\\" + file_delete;
+            try {
+                boolean exista = Files.deleteIfExists(Paths.get(fileName)); 
+                if(exista==true) 
+                System.out.println(ANSI_BLUE + "File deleted succesfully" + ANSI_RESET);
+                else 
+                   System.out.println(ANSI_BLUE + "File not found" + ANSI_RESET); 
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        date = new Date(System.currentTimeMillis()); // inscriem in fisierul de log-uri actiunea
+        text = newline + "Client " + c2.toString() + " deleted file: '" + file_name + "'" + " at: " + formatter.format(date);
+        ss = text.toCharArray();
+        data = new byte[ss.length];
+        for (int i = 0; i < ss.length; i++) {
+            data[i] = (byte) ss[i];
+        }
+        c2.write("logs_delete", data);
+    }
+
+    public static void write_file() throws IOException, NotBoundException, MessageNotFoundException {
+        Client c1 = new Client();
+        System.out.println(ANSI_BLUE + "Write selected: enter your text" + ANSI_RESET);
+        System.out.println();
+        filename = reader.readLine();
+        System.out.println(ANSI_BLUE + "Add text: " + ANSI_RESET);
+        System.out.println();
+        text = reader.readLine();
+        ss = text.toCharArray();
+        data = new byte[ss.length];
+        for (int i = 0; i < ss.length; i++) {
+            data[i] = (byte) ss[i];
+        }
+        c1.write(filename, data);
+
+        date = new Date(System.currentTimeMillis());
+        text = newline + "Client " + c1 + " created file: '" + filename + "'" + " at: " + formatter.format(date);
+        ss = text.toCharArray();
+        data = new byte[ss.length];
+        for (int i = 0; i < ss.length; i++) {
+            data[i] = (byte) ss[i];
+        }
+        c1.write("logs_write", data);
+        ;
+    }
+         
+	   public static void launchClients() {
+        try {
+            while (ok) {
+                nr = input_command();
+                switch (nr) {
+                    case 5:
+                        System.out.println("Wrong command");
+                        break;
+                    case 1:
+                        show_files();
+                        break;
+                    case 2: 
+                        write_file();
+                        break;
+                    case 3: 
+                        show_file_content();
+                        break;
+                    case 4:
+                        delete_file();
+                        break;
+                    default:
+                        System.out.println(ANSI_BLUE + "Exit" + ANSI_RESET);
+                        System.exit(0);
+                }
+            }
+
+
+        } catch (NotBoundException | IOException | MessageNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+//  ----------------------------------------------------------------------------------------------------------------------------------------- -----------------------------------------------------------------------------------------------------------------------------------------
 	/**
 	 * runs a custom test as follows
 	 * 1. write initial text to "file1"
@@ -202,7 +376,9 @@ public class Main {
 			respawnReplicaServers(master);
 
 //			customTest();
+                        afisare_comenzi();
 			launchClients();
+                        
 
 		} catch (RemoteException   e) {
 			System.err.println("Server exception: " + e.toString());
